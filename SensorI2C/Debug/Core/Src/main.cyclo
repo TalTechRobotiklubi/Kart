@@ -1,0 +1,5 @@
+../Core/Src/main.c:68:5:main	4
+../Core/Src/main.c:163:6:SystemClock_Config	4
+../Core/Src/main.c:204:9:i2cWrite_Accel	1
+../Core/Src/main.c:210:9:i2cRead_Accel	1
+../Core/Src/main.c:221:6:Error_Handler	1
