@@ -59,6 +59,8 @@ void SystemClock_Config(void);
 /* USER CODE BEGIN 0 */
 int32_t i2cWrite_Accel(void *handle, uint8_t reg, const uint8_t *bufp, uint16_t len);
 int32_t i2cRead_Accel(void *handle, uint8_t reg, uint8_t *bufp, uint16_t len);
+int32_t i2cWrite_Gyro( uint8_t reg, const uint8_t *bufp);
+int32_t i2cRead_Gyro( int8_t reg,  uint8_t *bufp, uint16_t len);
 /* USER CODE END 0 */
 
 /**
@@ -221,7 +223,7 @@ int32_t i2cWrite_Accel(void *handle, uint8_t reg, const uint8_t *bufp, uint16_t 
 
 int32_t i2cWrite_Gyro( uint8_t reg, const uint8_t *bufp)
 {
-	HAL_I2C_Mem_Write(&i2c1, 0x68, reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, 1, 1000);
+	HAL_I2C_Mem_Write(&hi2c1, 0x68, reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, 1, 1000);
 	return 0;
 }
 
@@ -233,7 +235,7 @@ int32_t i2cRead_Accel(void *handle, uint8_t reg,  uint8_t *bufp, uint16_t len)
 
 int32_t i2cRead_Gyro( int8_t reg,  uint8_t *bufp, uint16_t len)
 {
-	HAL_I2C_Mem_Read(&i2c1, 0x68, reg, I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+	HAL_I2C_Mem_Read(&hi2c1, 0x68, reg, I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 	return 0;
 }
 /* USER CODE END 4 */
