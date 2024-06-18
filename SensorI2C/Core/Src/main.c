@@ -17,22 +17,16 @@
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
+#include "main.h"
+#include "i2c.h"
+#include "usart.h"
+#include "gpio.h"
 
-#include <cmsis_gcc.h>
-#include <gpio.h>
-#include <i2c.h>
+/* Private includes ----------------------------------------------------------*/
+/* USER CODE BEGIN Includes */
 #include <lis2dw12_reg.h>
 #include <stdio.h>
-#include <stm32f3xx_hal_def.h>
-#include <stm32f3xx_hal_flash.h>
-#include <stm32f3xx_hal_i2c.h>
-#include <stm32f3xx_hal_rcc.h>
-#include <stm32f3xx_hal_rcc_ex.h>
-#include <stm32f3xx_hal_uart.h>
-#include <sys/_stdint.h>
-#include <usart.h>
-#include "main.h"
-
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -114,8 +108,10 @@ int main(void)
 	lis2dw12_device_id_get(&device_interface, &whoamI);
 	if (whoamI != LIS2DW12_ID)
 	{
+		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, 1);
 	  while(1);
 	}
+	//while(1);
 	lis2dw12_reset_set(&device_interface, PROPERTY_ENABLE);
 	do
 	{
@@ -138,10 +134,15 @@ int main(void)
 
 
 	  i2cRead_Gyro(0x0F,  &whoamI, 1);
-	  	if (whoamI != 0x68)
+	  sprintf((char *)tx_buffer,"%d\r\n", whoamI);
+	  	        HAL_UART_Transmit(&huart2, tx_buffer, strlen((char const *)tx_buffer), 200);
+
+	  	if (whoamI != 0b11010011)
 	  	{
+	  	  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_3, 1);
 	  	  while(1);
 	  	}
+	  	while(1);
 	  	// THIS IS NOT THE PROPER WAY TO THIS. SHOULD ONLY CHANGE CERTAIN BITS IN REGISTRY. function maybe fixable
 	  	i2cWrite_Gyro( 0x20, 0b00001111);//emables device and axis
 	  	i2cWrite_Gyro(0x21, 0b00000000); // highest cutoff frec, assentially sisables lowpass
@@ -172,7 +173,7 @@ int main(void)
 	        HAL_UART_Transmit(&huart2, tx_buffer, strlen((char const *)tx_buffer), 200);
 	      }
 
-	      i2cRead_Gyro(0x27,&rotAccReady);
+	      i2cRead_Gyro(0x27,&rotAccReady,1);
 	      if(rotAccReady & 0b1000)
 	      {
 	    	  memset(data_raw_rotationAccel, 0x00, 3 * sizeof(int16_t));
@@ -240,7 +241,7 @@ int32_t i2cWrite_Accel(void *handle, uint8_t reg, const uint8_t *bufp, uint16_t 
 int32_t i2cWrite_Gyro( uint8_t reg, const uint8_t *bufp)
 {
 	//TODO: read the registry, make only necessary bit changes (bitwise or/and ?), send registry
-	HAL_I2C_Mem_Write(&hi2c1, 0x68, reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, 1, 1000);
+	HAL_I2C_Mem_Write(&hi2c1, 0xD2, reg, I2C_MEMADD_SIZE_8BIT, (uint8_t*) bufp, 1, 1000);
 	return 0;
 }
 
@@ -252,7 +253,7 @@ int32_t i2cRead_Accel(void *handle, uint8_t reg,  uint8_t *bufp, uint16_t len)
 
 int32_t i2cRead_Gyro( int8_t reg,  uint8_t *bufp, uint16_t len)
 {
-	HAL_I2C_Mem_Read(&hi2c1, 0x68, reg, I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
+	HAL_I2C_Mem_Read(&hi2c1, 0xD3U, reg, I2C_MEMADD_SIZE_8BIT, bufp, len, 1000);
 	return 0;
 }
 /* USER CODE END 4 */
